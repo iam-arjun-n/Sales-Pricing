@@ -25,7 +25,8 @@
     "start": "cds-serve",
     "undeploy": "cf undeploy SalesPricing --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
-    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+    "watch-sales": "cds watch --open sales/webapp/index.html?sap-ui-xx-viewCache=false"
   },
   "cds": {
     "requires": {
