@@ -1,137 +1,157 @@
-_schema-version: 3.3.0
+_schema-version: '3.3'
 ID: SalesPricing
-description: A simple CAP project.
 version: 1.0.0
-modules:
-- name: SalesPricing-srv
-  type: nodejs
-  path: gen/srv
-  requires:
-  - name: SalesPricing-auth
-  - name: SalesPricing-db
-  provides:
-  - name: srv-api
-    properties:
-      srv-url: ${default-url}
-  parameters:
-    buildpack: nodejs_buildpack
-    instances: 1
-    memory: 200M
-  build-parameters:
-    builder: npm-ci
-    ignore:
-    - node_modules/
-    - test/
-    - coverage/
-    - npm-debug.log
-    - .env
-- name: SalesPricing-destination-content
-  type: com.sap.application.content
-  requires:
-  - name: SalesPricing-destination-service
-    parameters:
-      content-target: true
-  - name: SalesPricing-auth
-    parameters:
-      service-key:
-        name: SalesPricing-auth-key
-  parameters:
-    content:
-      instance:
-        destinations:
-        - Authentication: OAuth2UserTokenExchange
-          Name: router_SalesPricing_auth
-          ServiceInstanceName: SalesPricing-auth
-          ServiceKeyName: SalesPricing-auth-key
-          sap.cloud.service: SalesPricing
-        existing_destinations_policy: ignore
-  build-parameters:
-    no-source: true
-- name: SalesPricing-app-content
-  type: com.sap.application.content
-  path: .
-  requires:
-  - name: SalesPricing-repo-host
-    parameters:
-      content-target: true
-  build-parameters:
-    build-result: resources
-    requires:
-    - artifacts:
-      - comdeloittemdgsales.zip
-      name: comdeloittemdgsales
-      target-path: resources/
-- name: comdeloittemdgsales
-  type: html5
-  path: app/sales
-  parameters:
-    memory: 200M
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-- name: SalesPricing-db-deployer
-  type: hdb
-  path: gen/db
-  requires:
-  - name: SalesPricing-db
-  parameters:
-    buildpack: nodejs_buildpack
-    memory: 200M
-  build-parameters:
-    ignore:
-    - data/
-    - schema.csv
-    - .env
-    - error.log
-resources:
-- name: SalesPricing-auth
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      tenant-mode: dedicated
-      xsappname: salespricing
-    path: ./xs-security.json
-    service: xsuaa
-    service-plan: application
-- name: SalesPricing-destination-service
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      HTML5Runtime_enabled: true
-      init_data:
-        instance:
-          destinations:
-          - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://ui5.sap.com
-          existing_destinations_policy: update
-      version: 1.0.0
-    service: destination
-    service-name: SalesPricing-destination-service
-    service-plan: lite
-- name: SalesPricing-repo-host
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-name: SalesPricing-html5-service
-    service-plan: app-host
-- name: SalesPricing-db
-  type: com.sap.xs.hdi-container
-  parameters:
-    service: hana
-    service-plan: hdi-shared
+description: A simple CAP project
+
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
+
 build-parameters:
   before-all:
-  - builder: custom
-    commands:
-    - npm ci
-    - npx cds build --production
+    - builder: custom
+      commands:
+        - npm install
+        - npx cds build --production
+
+modules:
+  # CAP Service Module
+  - name: SalesPricing-srv
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: SalesPricing-auth
+      - name: SalesPricing-db
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 200M
+    build-parameters:
+      builder: npm-ci
+      ignore:
+        - node_modules/
+        - test/
+        - coverage/
+        - npm-debug.log
+        - .env
+
+  # Database Module
+  - name: SalesPricing-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: SalesPricing-db
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 200M
+    build-parameters:
+      ignore:
+        - data/
+        - schema.csv
+        - .env
+        - error.log
+
+  # HTML5 UI Module
+  - name: comdeloittemdgsales
+    type: html5
+    path: app/sales
+    parameters:
+      memory: 200M
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      build-result: dist
+      supported-platforms: []
+
+  # App Content Deployment Module
+  - name: SalesPricing-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: SalesPricing-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: comdeloittemdgsales
+          artifacts:
+            - comdeloittemdgsales.zip
+          target-path: resources/
+
+  # Destination Content Deployment
+  - name: SalesPricing-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: SalesPricing-destination-service
+        parameters:
+          content-target: true
+      - name: SalesPricing-auth
+        parameters:
+          service-key:
+            name: SalesPricing-auth-key
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Name: router_SalesPricing_auth
+              ServiceInstanceName: SalesPricing-auth
+              ServiceKeyName: SalesPricing-auth-key
+              sap.cloud.service: SalesPricing
+              Authentication: OAuth2UserTokenExchange
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
+
+resources:
+  # HDI Container
+  - name: SalesPricing-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+
+  # UAA Authentication
+  - name: SalesPricing-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      config:
+        xsappname: salespricing
+        tenant-mode: dedicated
+        path: ./xs-security.json
+
+  # Destination Service
+  - name: SalesPricing-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+      service-name: SalesPricing-destination-service
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+        init_data:
+          instance:
+            destinations:
+              - Name: ui5
+                Type: HTTP
+                ProxyType: Internet
+                URL: https://ui5.sap.com
+                Authentication: NoAuthentication
+            existing_destinations_policy: update
+
+  # HTML5 App Repository Host
+  - name: SalesPricing-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+      service-name: SalesPricing-html5-service
+ 

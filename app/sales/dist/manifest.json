@@ -17,16 +17,15 @@
     "resources": "resources.json",
     "sourceTemplate": {
       "id": "@sap/generator-fiori:basic",
-      "version": "1.18.3",
-      "toolsId": "a9480913-6917-4818-a103-9d7d5c585f43"
+      "version": "1.18.3"
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/material/",
+        "uri": "/sap/opu/odata/sap/API_SLSPRICINGCONDITIONRECORD_SRV/",
         "type": "OData",
         "settings": {
-          "annotations": [],
-          "odataVersion": "4.0"
+          "odataVersion": "2.0",
+          "localUri": "localService/metadata.xml"
         }
       }
     },
@@ -66,7 +65,9 @@
       "minUI5Version": "1.138.1",
       "libs": {
         "sap.m": {},
-        "sap.ui.core": {}
+        "sap.ui.core": {},
+        "sap.ui.table": {},
+        "sap.ui.comp": {}
       }
     },
     "contentDensities": {
@@ -87,9 +88,8 @@
         "dataSource": "mainService",
         "preload": true,
         "settings": {
-          "operationMode": "Server",
-          "autoExpandSelect": true,
-          "earlyRequests": true
+          "useBatch": true,
+          "defaultBindingMode": "TwoWay"
         }
       }
     },
@@ -123,8 +123,9 @@
       ],
       "targets": {
         "TargetOverview": {
-          "id": "Overview",
-          "name": "Overview"
+          "viewName": "Overview",
+          "viewPath": "com.deloitte.mdg.sales.view",
+          "viewType": "XML"
         }
       }
     },

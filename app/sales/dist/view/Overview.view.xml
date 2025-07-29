@@ -1,6 +1,38 @@
-<mvc:View controllerName="com.deloitte.mdg.sales.controller.Overview"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
-    </Page>
+<mvc:View
+  controllerName="com.deloitte.mdg.sales.controller.Overview"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:smartTable="sap.ui.comp.smarttable"
+  xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+  xmlns:core="sap.ui.core">
+
+  <VBox class="sapUiSmallMargin">
+    
+    <smartFilterBar:SmartFilterBar
+      id="smartFilterBar"
+      entitySet="A_SlsPrcgConditionRecord"
+      useToolbar="true"
+      liveMode="true"
+      persistencyKey="SmartFilterBarKey"
+      showClearOnFB="true"
+    />
+
+    <smartTable:SmartTable
+      id="smartTable"
+      entitySet="A_SlsPrcgConditionRecord"
+      smartFilterId="smartFilterBar"
+      tableType="ResponsiveTable"
+      useExportToExcel="true"
+      useVariantManagement="true"
+      useTablePersonalisation="true"
+      header="Sales Pricing Records"
+      showRowCount="true"
+      persistencyKey="SmartTableKey"
+      enableAutoBinding="true"
+      initiallyVisibleFields="">
+      
+    </smartTable:SmartTable>
+    
+  </VBox>
+
 </mvc:View>

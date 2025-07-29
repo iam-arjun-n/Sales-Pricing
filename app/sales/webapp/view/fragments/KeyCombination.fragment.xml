@@ -1,0 +1,46 @@
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:controller="sap.ui.core.mvc.Controller">
+
+  <Dialog
+    id="keyComboDialog"
+    title="Key Combination"
+    draggable="true"
+    resizable="true"
+    contentWidth="400px"
+    contentHeight="300px"
+    class="sapUiResponsivePadding--header sapUiResponsivePadding--content">
+
+    <List
+      id="keyComboList"
+      mode="SingleSelectMaster"
+      items="{
+        path: 'KeyComboModel>/keyCombinations'
+      }"
+      itemPress="controller:onKeyCombinationSelect">
+
+      <StandardListItem
+        title="{KeyComboModel>name}"
+        type="Active"
+      />
+    </List>
+
+    <beginButton>
+      <Button
+        icon="sap-icon://accept"
+        text="Select"
+        press="onKeyComboConfirm"
+      />
+    </beginButton>
+
+    <endButton>
+      <Button
+        icon="sap-icon://decline"
+        text="Cancel"
+        press="onKeyComboCancel"
+      />
+    </endButton>
+
+  </Dialog>
+</core:FragmentDefinition>
